@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minimalist Notes</title>
+  
+  <!-- PWA Metadata -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#fbf9f5" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Notes</span>
+        <button class="btn-new" id="newNoteBtn">+ New</button>
+      </div>
+      <div class="notes-list" id="notesList"></div>
+    </aside>
+
+    <main class="main-content">
+      <input type="text" class="title-input" id="noteTitle" placeholder="Untitled Note" />
+      <textarea class="editor-textarea" id="noteBody" placeholder="Start typing..."></textarea>
+      
+      <footer class="status-bar">
+        <div class="status-metrics">
+          <span id="wordCount">0 words</span>
+          <span id="charCount">0 chars</span>
+          <span id="saveStatus">Saved</span>
+        </div>
+        <div class="actions">
+          <button class="btn-action" id="themeToggle">[Toggle Mode]</button>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="main.js"></script>
+  
+  <!-- Register Service Worker for Offline Capability -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered', reg))
+          .catch(err => console.error('Service Worker registration failed', err));
+      });
+    }
+  </script>
+</body>
+</html>
