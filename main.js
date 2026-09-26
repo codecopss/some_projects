@@ -1,12 +1,14 @@
 let notes = JSON.parse(localStorage.getItem('minimalist_notes') || '[]');
 let activeId = null;
 let saveTimeout = null;
+let noteToDeleteId = null;
 
 if (notes.length === 0) {
   notes.push({ id: Date.now(), title: "Welcome Note", body: "Type your notes here. Everything auto-saves!" });
 }
 activeId = notes[0].id;
 
+// DOM Elements
 const notesListEl = document.getElementById('notesList');
 const titleInput = document.getElementById('noteTitle');
 const bodyInput = document.getElementById('noteBody');
@@ -15,6 +17,16 @@ const charCountEl = document.getElementById('charCount');
 const saveStatusEl = document.getElementById('saveStatus');
 const newNoteBtn = document.getElementById('newNoteBtn');
 const themeToggleBtn = document.getElementById('themeToggle');
+
+// Modal DOM Elements
+const confirmModal = document.getElementById('confirmModal');
+const modalMessage = document.getElementById('modalMessage');
+const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+// Load saved theme preference on boot (defaulting to 'dark')
+const savedTheme = localStorage.getItem('app_theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
 
 function saveToStorage() {
   localStorage.setItem('minimalist_notes', JSON.stringify(notes));
@@ -53,15 +65,40 @@ function selectNote(id) {
   }
 }
 
+// Open Custom UI Delete Modal
 function deleteNote(id) {
-  notes = notes.filter(n => n.id !== id);
-  if (notes.length === 0) {
-    notes.push({ id: Date.now(), title: "Untitled Note", body: "" });
-  }
-  activeId = notes[0].id;
-  saveToStorage();
-  selectNote(activeId);
+  noteToDeleteId = id;
+  const note = notes.find(n => n.id === id);
+  const noteTitle = note && note.title ? note.title : 'Untitled Note';
+
+  modalMessage.textContent = `Are you sure you want to delete "${noteTitle}"?`;
+  confirmModal.classList.add('active');
 }
+
+function hideDeleteModal() {
+  confirmModal.classList.remove('active');
+  noteToDeleteId = null;
+}
+
+cancelDeleteBtn.onclick = hideDeleteModal;
+
+confirmDeleteBtn.onclick = () => {
+  if (noteToDeleteId !== null) {
+    notes = notes.filter(n => n.id !== noteToDeleteId);
+    if (notes.length === 0) {
+      notes.push({ id: Date.now(), title: "Untitled Note", body: "" });
+    }
+    activeId = notes[0].id;
+    saveToStorage();
+    selectNote(activeId);
+  }
+  hideDeleteModal();
+};
+
+// Close modal when clicking outside the card
+confirmModal.onclick = (e) => {
+  if (e.target === confirmModal) hideDeleteModal();
+};
 
 function updateMetrics() {
   const text = bodyInput.value;
@@ -97,7 +134,7 @@ newNoteBtn.onclick = () => {
 
 themeToggleBtn.onclick = () => {
   const currentTheme = document.documentElement.getAttribute('data-theme');
-  const nextTheme = currentTheme === 'light' ? 'dark' : 'dark';
+  const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', nextTheme);
   localStorage.setItem('app_theme', nextTheme);
 };
@@ -105,18 +142,17 @@ themeToggleBtn.onclick = () => {
 titleInput.oninput = handleInput;
 bodyInput.oninput = handleInput;
 
-// Keyboard Shortcut: Ctrl+S / Cmd+S
+// Keyboard Shortcuts: Ctrl+S/Cmd+S for saving, Escape for closing modal
 window.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 's') {
     e.preventDefault();
     clearTimeout(saveTimeout);
     saveToStorage();
   }
+  if (e.key === 'Escape' && confirmModal.classList.contains('active')) {
+    hideDeleteModal();
+  }
 });
 
 // Initial load
 selectNote(activeId);
-
-// Load saved theme preference on boot (defaulting to 'dark')
-const savedTheme = localStorage.getItem('app_theme') || 'dark';
-document.documentElement.setAttribute('data-theme', savedTheme);

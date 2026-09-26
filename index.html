@@ -40,6 +40,18 @@
     </main>
   </div>
 
+  <!-- Custom Confirmation Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-card">
+    <h3 class="modal-title">Delete Note</h3>
+    <p class="modal-message" id="modalMessage">Are you sure you want to delete this note?</p>
+    <div class="modal-actions">
+      <button class="btn-modal btn-cancel" id="cancelDeleteBtn">Cancel</button>
+      <button class="btn-modal btn-confirm" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
   <script src="main.js"></script>
   
   <!-- Register Service Worker for Offline Capability -->
